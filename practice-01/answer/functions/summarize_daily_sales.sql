@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.summarize_daily_sales(target_date date)
+CREATE OR REPLACE FUNCTION summarize_daily_sales(target_date date)
 RETURNS void
 LANGUAGE 'plpgsql'    
 AS $BODY$
@@ -15,14 +15,14 @@ BEGIN
             )
         SELECT
             target_date,
-            products.product_id,
+            p.product_id,
             COALESCE(SUM(order_details.quantity), 0),
-            COALESCE(SUM(products.price * order_details.quantity), 0)
-        FROM products
+            COALESCE(SUM(p.price * order_details.quantity), 0)
+        FROM products AS p
             LEFT JOIN order_details
-            ON products.product_id = order_details.product_id
-        WHERE products.product_id = product_record.product_id
-        GROUP BY products.product_id;
+            ON p.product_id = order_details.product_id
+        WHERE p.product_id = product_record.product_id
+        GROUP BY p.product_id;
     END LOOP;
 END;
 $BODY$;
