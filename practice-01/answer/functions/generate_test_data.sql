@@ -1,23 +1,29 @@
-CREATE OR REPLACE FUNCTION public.create_testdate(start_date date, end_date date) 
+CREATE OR REPLACE FUNCTION create_testdate(start_date date, end_date date) 
 RETURNS void 
 LANGUAGE 'plpgsql' 
-AS $BODY$ 
-DECLARE 
-new_order_id INT;
+AS $$
+DECLARE
+    row_order orders%ROWTYPE;
+BEGIN
+    INSERT INTO orders (order_datetime)
+    SELECT
+        d::date + (random() * INTERVAL '23 hours')
+    FROM
+        generate_series(start_date, end_date, '1 day') AS d;
 
-BEGIN 
-    WHILE start_date <= end_date LOOP
-        INSERT INTO orders(order_datetime)
-        VALUES(start_date + (random() * INTERVAL '23 hours')) 
-            RETURNING order_id INTO new_order_id;
-        INSERT INTO order_details(order_id, product_id, quantity)
-        VALUES
-            (
-                new_order_id,
-                (1 + floor(random() * 5)) :: INT,
-                (1 + floor(random() * 10)) :: INT
-            );
-        start_date := start_date + INTERVAL '1 day';
+    FOR row_order IN
+        SELECT * 
+		FROM orders
+        WHERE order_datetime::date BETWEEN start_date AND end_date
+    LOOP
+
+        INSERT INTO order_details (order_id, product_id, quantity)
+        SELECT
+            row_order.order_id,
+            (1 + floor(random() * 5))::int,
+            (1 + floor(random() * 10))::int
+        FROM
+            generate_series(1,1 + floor(random() * 3)::int);
     END LOOP;
 END;
-$BODY$;
+$$;
