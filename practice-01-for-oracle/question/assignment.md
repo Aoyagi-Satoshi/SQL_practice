@@ -1,0 +1,1 @@
+（PostgreSQL版と同じ内容をOracleで実施してください）

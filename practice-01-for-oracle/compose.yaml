@@ -1,0 +1,13 @@
+services:
+  db:
+    image: gvenzl/oracle-xe:21.3.0-slim
+    container_name: oracle-batch-practice-db
+    environment:
+      ORACLE_PASSWORD: oracle
+      APP_USER: appuser
+      APP_USER_PASSWORD: appuserpw
+    ports:
+      - "11521:1521"
+    volumes:
+      - ./infra/oracle/data:/opt/oracle/oradata
+      - ./infra/oracle/init:/docker-entrypoint-initdb.d
